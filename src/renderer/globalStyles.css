@@ -1,0 +1,24 @@
+:root {
+  --body-background-color: #808080;
+  --main-app-color: #10a37f;
+  --chat-background-color: #555;
+  --ai-msg-bg-color: #333;
+  --chat-text-color: #ddd;
+  --chat-input-bg-color: #4f4f4f;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  padding: 8px;
+  margin: 0;
+  background-color: var(--body-background-color);
+}
+
+#root {
+  font-family: Arial, sans-serif;
+}

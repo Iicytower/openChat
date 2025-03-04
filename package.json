@@ -1,0 +1,55 @@
+{
+  "name": "openchat",
+  "version": "1.0.0",
+  "description": "This is OpenChat description",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "concurrently \"npm run start:react\" \"npm run start:electron\"",
+    "start:electron": "wait-on http://localhost:3000 && electron .",
+    "start:react": "webpack serve --mode development",
+    "build": "webpack --mode production && electron-builder",
+    "build:linux": "electron-builder --linux",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:web": "webpack --mode production"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "build": {
+    "appId": "com.example.electronapp",
+    "productName": "ElectronApp",
+    "files": [
+      "dist/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "css-loader": "^7.1.2",
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.2",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.6",
+    "@mui/material": "^6.4.6",
+    "concurrently": "^9.1.2",
+    "html-webpack-plugin": "^5.6.3",
+    "json": "^11.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "wait-on": "^8.0.2",
+    "webpack-dev-server": "^5.2.0"
+  }
+}
