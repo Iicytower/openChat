@@ -94,34 +94,42 @@ const Chat: React.FC = () => {
                 color: "var(--chat-text-color)",
               }}
             >
-              <Typography>{msg.text}</Typography>
+              <Typography sx={{ wordBreak: 'break-word' }}>{msg.text}</Typography>
             </Box>
           </Box>
         ))}
       </Box>
 
       {/* Input Box */}
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 2, backgroundColor: "var(--chat-input-bg-color)" }}>
-        {isSystemPromptVisible && 
+      <Box sx={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        p: 2,
+        backgroundColor: "var(--chat-input-bg-color)"
+      }}>
+        <Box sx={{ display: "flex", flexDirection: "column" }} >
+          {isSystemPromptVisible && 
+            <TextField
+              sx={{ input: { color: 'var(--chat-text-color)' }, minWidth: '90vw', }}
+              fullWidth
+              variant="outlined"
+              placeholder="Type a system prompt..."
+              value={systemInput}
+              onChange={(e) => setSystemInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+            />
+          }
           <TextField
-            sx={{ input: { color: 'var(--chobjectat-text-color)' } }}
+            sx={{ input: { color: 'var(--chat-text-color)' }, minWidth: '90vw', }}
             fullWidth
             variant="outlined"
-            placeholder="Type a system prompt..."
-            value={systemInput}
-            onChange={(e) => setSystemInput(e.target.value)}
+            placeholder="Type a user prompt..."
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           />
-        }
-        <TextField
-          sx={{ input: { color: 'var(--chat-text-color)' } }}
-          fullWidth
-          variant="outlined"
-          placeholder="Type a user prompt..."
-          value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-        />
+        </Box>
         <IconButton color="primary" onClick={handleSendMessage} sx={{ ml: 1 }}>
           <SendIcon />
         </IconButton>
