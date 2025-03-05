@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import SendIcon from "@mui/icons-material/Send";
 import {
   Box,
@@ -6,12 +6,9 @@ import {
   Toolbar,
   Typography,
   IconButton,
-  Menu,
-  MenuItem,
-  Switch,
-  FormControlLabel,
   TextField
-} from '@mui/material';import SettingsIcon from '@mui/icons-material/Settings';
+} from '@mui/material';
+import SettingsMenu from './SettingsMenu';
 
 interface Message {
   sender: string;
@@ -20,49 +17,45 @@ interface Message {
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
-  const [darkMode, setDarkMode] = useState<boolean>(false);
-  const [sendChatHostory, setsendChatHostory] = useState<boolean>(false);
+  const [userInput, setUserInput] = useState("");
+  const [systemInput, setSystemInput] = useState("");
+
+  const [isSystemPromptVisible, setIsSystemPromptVisible] = useState(
+    JSON.parse(localStorage.getItem('systemPrompt') || 'false')
+  );
 
   useEffect(() => {
-    const savedDarkMode = localStorage.getItem('darkMode');
-    const savedsendChatHostory = localStorage.getItem('sendChatHostory');
+    const updateSystemPromptVisibility = () => {
+      setIsSystemPromptVisible(JSON.parse(localStorage.getItem('systemPrompt') || 'false'));
+    };
 
-    if (savedDarkMode) {
-      setDarkMode(JSON.parse(savedDarkMode));
-    }
+    // Listen for storage changes (cross-tab)
+    window.addEventListener('storage', updateSystemPromptVisibility);
 
-    if (savedsendChatHostory) {
-      setsendChatHostory(JSON.parse(savedsendChatHostory));
-    }
+    // Polling mechanism to detect changes within the same tab
+    const interval = setInterval(updateSystemPromptVisibility, 500);
+
+    return () => {
+      window.removeEventListener('storage', updateSystemPromptVisibility);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleSendMessage = () => {
-    if (!input.trim()) return;
-    setMessages([...messages, { sender: "user", text: input }, { sender: "gpt", text: "Thinking..." }]);
-    setInput("");
+    if (!userInput.trim()) return;
+    setMessages([
+      ...messages,
+      {
+        sender: "user",
+        text: JSON.stringify({ systemPrompt: systemInput, userPrompt: userInput }, null, 2)
+      },
+      { sender: "gpt", text: "Thinking..." }
+    ]);
+    setUserInput("");
+    setSystemInput("");
     setTimeout(() => {
       setMessages((prev) => [...prev.slice(0, -1), { sender: "gpt", text: "Hello! How can I assist you?" }]);
     }, 1000);
-  };
-
-  const handleSettingsClick = (event: React.MouseEvent<HTMLElement>) => {
-    setSettingsAnchorEl(event.currentTarget);
-  };
-
-  const handleSettingsClose = () => {
-    setSettingsAnchorEl(null);
-  };
-
-  const handleDarkModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDarkMode(event.target.checked);
-    localStorage.setItem('darkMode', JSON.stringify(event.target.checked));
-  };
-  
-  const handlesendChatHostoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setsendChatHostory(event.target.checked);
-    localStorage.setItem('sendChatHostory', JSON.stringify(event.target.checked));
   };
 
   return (
@@ -77,27 +70,7 @@ const Chat: React.FC = () => {
       <AppBar position="static" sx={{ backgroundColor: "var(--main-app-color)" }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>Current chat</Typography>
-          <IconButton edge="end" color="inherit" onClick={handleSettingsClick}>
-            <SettingsIcon />
-          </IconButton>
-          <Menu
-            anchorEl={settingsAnchorEl}
-            open={Boolean(settingsAnchorEl)}
-            onClose={handleSettingsClose}
-          >
-            <MenuItem>
-              <FormControlLabel
-                control={<Switch checked={darkMode} onChange={handleDarkModeChange} />}
-                label="Dark Mode"
-              />
-            </MenuItem>
-            <MenuItem>
-              <FormControlLabel
-                control={<Switch checked={sendChatHostory} onChange={handlesendChatHostoryChange} />}
-                label="Send chat history"
-              />
-            </MenuItem>
-          </Menu>
+          <SettingsMenu />
         </Toolbar>
       </AppBar>
 
@@ -128,14 +101,25 @@ const Chat: React.FC = () => {
       </Box>
 
       {/* Input Box */}
-      <Box sx={{ display: "flex", alignItems: "center", p: 2, backgroundColor: "var(--chat-input-bg-color)" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 2, backgroundColor: "var(--chat-input-bg-color)" }}>
+        {isSystemPromptVisible && 
+          <TextField
+            sx={{ input: { color: 'var(--chobjectat-text-color)' } }}
+            fullWidth
+            variant="outlined"
+            placeholder="Type a system prompt..."
+            value={systemInput}
+            onChange={(e) => setSystemInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+          />
+        }
         <TextField
           sx={{ input: { color: 'var(--chat-text-color)' } }}
           fullWidth
           variant="outlined"
-          placeholder="Type a message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a user prompt..."
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
         />
         <IconButton color="primary" onClick={handleSendMessage} sx={{ ml: 1 }}>
