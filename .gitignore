@@ -38,4 +38,5 @@ yarn-error.log*
 *.sw?
 
 # other
-.history
+.history/
+notes.md
